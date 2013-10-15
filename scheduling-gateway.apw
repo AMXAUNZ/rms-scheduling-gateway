@@ -130,6 +130,10 @@
 <UserName></UserName>
 <Password></Password>
 <Comments></Comments>
+<File CompileType="None" Type="Include"><Identifier>XmlUtil</Identifier>
+<FilePathName>include\XmlUtil.axi</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="None" Type="Include"><Identifier>RmsApi</Identifier>
 <FilePathName>lib\rms-sdk\includes\RmsApi.axi</FilePathName>
 <Comments></Comments>

@@ -24,10 +24,7 @@ volatile char locationNames[][16] = {
 	'Demo Area'
 };
 
-volatile integer locationCount = 4;
-
-
 
 define_module 'RmsNetLinxAdapter_dr4_0_0' mdlRms(vdvRms);
 
-define_module 'RmsSchedulingExporter' mdlRmsExport(vdvRms, locationIds, locationNames, locationCount, exportFile);
+define_module 'RmsSchedulingExporter' mdlRmsExport(vdvRms, locationIds, locationNames, exportFile);
