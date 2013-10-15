@@ -130,6 +130,26 @@
 <UserName></UserName>
 <Password></Password>
 <Comments></Comments>
+<File CompileType="None" Type="Include"><Identifier>RmsApi</Identifier>
+<FilePathName>lib\rms-sdk\includes\RmsApi.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>RmsEventListener</Identifier>
+<FilePathName>lib\rms-sdk\includes\RmsEventListener.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>RmsSchedulingApi</Identifier>
+<FilePathName>lib\rms-sdk\includes\RmsSchedulingApi.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>RmsSchedulingEventListener</Identifier>
+<FilePathName>lib\rms-sdk\includes\RmsSchedulingEventListener.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="DUET"><Identifier>RmsNetLinxAdapter_dr4_0_0</Identifier>
+<FilePathName>lib\rms-sdk\RmsNetLinxAdapter_dr4_0_0.jar</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="Netlinx" Type="MasterSrc"><Identifier>master</Identifier>
 <FilePathName>master.axs</FilePathName>
 <Comments></Comments>

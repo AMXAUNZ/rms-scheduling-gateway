@@ -1,0 +1,3 @@
+[submodule "lib/rms-sdk"]
+	path = lib/rms-sdk
+	url = https://github.com/KimBurgess/rms-sdk.git
