@@ -10,6 +10,7 @@ MODULE_NAME='RmsSchedulingExporter'(dev vdvRms, long locationIds[], char locatio
 
 
 #include 'RmsApi'
+#include 'RmsEventListener';
 #include 'RmsSchedulingApi';
 #include 'RmsSchedulingEventListener';
 #include 'XmlUtil'
@@ -27,9 +28,10 @@ structure bookingTracker {
 define_variable
 
 constant integer MAX_LOCATIONS = 10;
+constant integer POLL_INTERVAL = 300; // seconds
+constant integer XML_WRITE_DELAY = 15; // seconds
 
 constant long POLL_TL = 1;
-constant integer POLL_INTERVAL = 5; // minutes
 
 volatile bookingTracker bookings[MAX_LOCATIONS];
 
@@ -41,6 +43,8 @@ define_function log(char msg[]) {
 define_function init() {
 	stack_var integer i;
 
+	log('init() called');
+
 	for (i = 1; i <= length_array(locationIds); i++) {
 		setBookingTracker(i, locationIds[i], locationNames[i]);
 	}
@@ -50,6 +54,8 @@ define_function init() {
 
 define_function startPolling() {
 	stack_var long pollTimes[1];
+
+	log('startPolling() called');
 
 	pollTimes[1] = POLL_INTERVAL * 1000;
 
@@ -65,6 +71,8 @@ define_function startPolling() {
 }
 
 define_function stopPolling() {
+	log('stopPolling() called');
+
 	if (timeline_active(POLL_TL)) {
 		timeline_kill(POLL_TL);
 	}
@@ -95,7 +103,6 @@ define_function updateActiveBooking(RmsEventBookingResponse booking) {
 	idx = getLocationIdx(booking.location);
 	if (idx) {
 		bookings[idx].activeBooking = booking;
-		exportBookingXml();
 	}
 }
 
@@ -107,18 +114,26 @@ define_function updateNextBooking(RmsEventBookingResponse booking) {
 	idx = getLocationIdx(booking.location);
 	if (idx) {
 		bookings[idx].nextBooking = booking;
-		exportBookingXml();
 	}
 }
 
 define_function queryBookings() {
+	stack_var RmsEventBookingResponse nullBooking;
 	stack_var integer i;
 
 	log('queryBookings() called');
 
+	cancel_wait 'delayedXmlWrite';
+
 	for (i = 1; i <= length_array(bookings); i++) {
+		bookings[i].activeBooking = nullBooking;
+		bookings[i].nextBooking = nullBooking;
 		RmsBookingActiveRequest(bookings[i].location.id);
 		RmsBookingNextActiveRequest(bookings[i].location.id);
+	}
+
+	wait (XML_WRITE_DELAY * 10) 'delayedXmlWrite' {
+		exportBookingXml();
 	}
 }
 
@@ -154,6 +169,8 @@ define_function exportBookingXml() {
 	stack_var char tmp[2048];
 	stack_var slong fileHandle;
 	stack_var integer i;
+
+	log('exportBookingXml() called');
 
 	fileHandle = file_open(filename, FILE_RW_NEW);
 
