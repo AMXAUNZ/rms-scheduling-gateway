@@ -16,3 +16,7 @@ define_function char[256] XmlBuildCloseTag(char tag[]) {
 define_function char[512] XmlBuildElement(char tag[], char value[]) {
 	return "XmlBuildOpenTag(tag), value, XmlBuildCloseTag(tag)";
 }
+
+define_function char[2046] XmlBuildCData(char data[]) {
+	return "'<![CDATA[', data, ']]>'";
+}
