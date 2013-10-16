@@ -133,6 +133,7 @@ define_function queryBookings() {
 
 define_function char[2048] bookingToXmlElement(RmsLocation location, RmsEventBookingResponse booking) {
 	return XmlBuildElement('booking', "
+			XmlBuildElement('id', booking.bookingId),
 			XmlBuildElement('location', "
 				XmlBuildElement('id', itoa(location.id)),
 				XmlBuildElement('name', location.name)
