@@ -40,26 +40,26 @@ define_function log(char msg[]) {
 
 define_function init() {
 	stack_var integer i;
-	
+
 	for (i = 1; i <= length_array(locationIds); i++) {
 		setBookingTracker(i, locationIds[i], locationNames[i]);
 	}
-	
+
 	set_length_array(bookings, length_array(locationIds));
 }
 
 define_function startPolling() {
 	stack_var long pollTimes[1];
-	
+
 	pollTimes[1] = POLL_INTERVAL * 1000;
-	
+
 	if (!timeline_active(POLL_TL)) {
 		timeline_create(POLL_TL,
-				pollTImes, 
-				1, 
-				TIMELINE_RELATIVE, 
+				pollTImes,
+				1,
+				TIMELINE_RELATIVE,
 				TIMELINE_REPEAT);
-		
+
 		queryBookings();
 	}
 }
@@ -80,9 +80,9 @@ define_function setBookingTracker(integer idx, long locationId, char locationNam
 
 define_function integer getLocationIdx(long locationId) {
 	stack_var integer idx;
-	
+
 	log('updateActiveBooking() called');
-	
+
 	for (idx = 1; idx <= length_array(bookings); idx++) {
 		if (bookings[idx].location.id == locationId) {
 			return idx;
@@ -95,27 +95,27 @@ define_function updateActiveBooking(RmsEventBookingResponse booking) {
 	idx = getLocationIdx(booking.location);
 	if (idx) {
 		bookings[idx].activeBooking = booking;
-		writeXml();
+		exportBookingXml();
 	}
 }
 
 define_function updateNextBooking(RmsEventBookingResponse booking) {
 	stack_var integer idx;
-	
+
 	log('updateNextBooking() called');
-	
+
 	idx = getLocationIdx(booking.location);
 	if (idx) {
 		bookings[idx].nextBooking = booking;
-		writeXml();
+		exportBookingXml();
 	}
 }
 
 define_function queryBookings() {
 	stack_var integer i;
-	
+
 	log('queryBookings() called');
-	
+
 	for (i = 1; i <= length_array(bookings); i++) {
 		RmsBookingActiveRequest(bookings[i].location.id);
 		RmsBookingNextActiveRequest(bookings[i].location.id);
@@ -141,36 +141,51 @@ define_function char[2048] bookingToXmlElement(RmsLocation location, RmsEventBoo
 		");
 }
 
-define_function writeXml() {
-	stack_var char buf[16384];
+define_function writeLine(slong fileHandle, char buf[]) {
+	if (fileHandle < 1) {
+		log("'Bad file handle (error ', itoa(fileHandle), ')'");
+		return;
+	}
+
+	file_write_line(fileHandle, buf, length_string(buf));
+}
+
+define_function exportBookingXml() {
+	stack_var char tmp[2048];
 	stack_var slong fileHandle;
 	stack_var integer i;
-	
-	log('writeXml() called');
-	
-	buf = XmlBuildHeader('1.0', 'UTF-8');
+
+	fileHandle = file_open(filename, FILE_RW_NEW);
+
+	if (fileHandle < 0) {
+		log("'Could not open file (error ', itoa(fileHandle), ')'");
+		return;
+	}
+
+	writeLine(fileHandle, XmlBuildHeader('1.0', 'UTF-8'));
+
+	writeLine(fileHandle, XmlBuildOpenTag('bookings'));
 
 	// loop through each of our locations and...
 	for (i = 1; i <= length_array(bookings); i++) {
-		
+
 		// add in active bookings
 		if (bookings[i].activeBooking.bookingId) {
-			buf = "buf, bookingToXmlElement(bookings[i].location, bookings[i].activeBooking)";
+			writeLine(fileHandle, bookingToXmlElement(bookings[i].location, bookings[i].activeBooking));
 		}
-		
+
 		// as well as thouse starting in the next 10 minutes
 		if (bookings[i].nextBooking.bookingId <> '' &&
 				bookings[i].nextBooking.minutesUntilStart <= 10) {
-			buf = "buf, bookingToXmlElement(bookings[i].location, bookings[i].nextBooking)";
+			writeLine(fileHandle, bookingToXmlElement(bookings[i].location, bookings[i].nextBooking));
 		}
 	}
-	
-	fileHandle = file_open(filename, FILE_RW_NEW);
-	
-	file_write(fileHandle, buf, length_string(buf));
-	
+
+	writeLine(fileHandle, XmlBuildCloseTag('bookings'));
+
 	file_close(fileHandle);
 }
+
 
 // RMS callbacks
 
