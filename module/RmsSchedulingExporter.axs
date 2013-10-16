@@ -182,12 +182,12 @@ define_function exportBookingXml() {
 	for (i = 1; i <= length_array(bookings); i++) {
 
 		// add in active bookings
-		if (bookings[i].activeBooking.bookingId) {
+		if (bookings[i].activeBooking.bookingId != '') {
 			writeLine(fileHandle, bookingToXmlElement(bookings[i].location, bookings[i].activeBooking));
 		}
 
 		// as well as thouse starting in the next 10 minutes
-		if (bookings[i].nextBooking.bookingId <> '' &&
+		if (bookings[i].nextBooking.bookingId != '' &&
 				bookings[i].nextBooking.minutesUntilStart <= 10) {
 			writeLine(fileHandle, bookingToXmlElement(bookings[i].location, bookings[i].nextBooking));
 		}
